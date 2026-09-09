@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic Letters Adventure</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 20%, #fff6a8 0 4%, transparent 5%),
+    radial-gradient(circle at 80% 15%, #d5f5ff 0 5%, transparent 6%),
+    linear-gradient(135deg, #8edfff, #b9a5ff 50%, #ffb8df);
+  color: #3d356b;
+  overflow-x: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ---------------- HEADER ---------------- */
+
+.topbar {
+  width: 100%;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 2px 3px 0 #7c5ac7;
+}
+
+.stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  background: rgba(255,255,255,.9);
+  padding: 9px 15px;
+  border-radius: 25px;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(70,40,120,.15);
+}
+
+/* ---------------- SCREENS ---------------- */
+
+.screen {
+  min-height: calc(100vh - 75px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+}
+
+.card {
+  width: min(100%, 900px);
+  background: rgba(255,255,255,.94);
+  border-radius: 35px;
+  padding: 35px;
+  box-shadow: 0 20px 60px rgba(50,30,100,.2);
+  text-align: center;
+}
+
+/* ---------------- START ---------------- */
+
+.magic-title {
+  font-size: clamp(42px, 8vw, 82px);
+  color: #7353c9;
+  text-shadow: 4px 5px 0 #ffd85c;
+  margin: 15px 0;
+}
+
+.subtitle {
+  font-size: 22px;
+  margin-bottom: 25px;
+  color: #625b88;
+}
+
+.lumi {
+  font-size: 110px;
+  animation: float 2.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-18px) rotate(3deg); }
+}
+
+.magic-stars {
+  font-size: 35px;
+  letter-spacing: 15px;
+  animation: sparkle 1.4s infinite alternate;
+}
+
+@keyframes sparkle {
+  from { transform: scale(.9); opacity: .6; }
+  to { transform: scale(1.1); opacity: 1; }
+}
+
+/* ---------------- BUTTONS ---------------- */
+
+.main-btn {
+  background: linear-gradient(135deg,#7b5ce1,#ff69ad);
+  color: white;
+  padding: 17px 35px;
+  border-radius: 30px;
+  font-size: 21px;
+  font-weight: bold;
+  margin: 8px;
+  box-shadow: 0 8px 0 #59419e;
+  transition: .15s;
+}
+
+.main-btn:hover {
+  transform: translateY(-3px);
+}
+
+.main-btn:active {
+  transform: translateY(5px);
+  box-shadow: 0 3px 0 #59419e;
+}
+
+.secondary-btn {
+  background: #e8e3ff;
+  color: #55468e;
+  padding: 12px 20px;
+  border-radius: 22px;
+  font-weight: bold;
+  margin: 5px;
+}
+
+/* ---------------- MAP ---------------- */
+
+.map-title {
+  font-size: 42px;
+  color: #7053c5;
+  margin-bottom: 20px;
+}
+
+.map {
+  display: grid;
+  grid-template-columns: repeat(7,1fr);
+  gap: 15px;
+  max-width: 700px;
+  margin: 25px auto;
+}
+
+.map-letter {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 900;
+  margin: auto;
+  background: #ffd95c;
+  color: #6948a8;
+  box-shadow: 0 7px 0 #d7ad35;
+  position: relative;
+  transition: .2s;
+}
+
+.map-letter:hover:not(.locked) {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.map-letter.locked {
+  background: #c9c9d5;
+  color: #777;
+  box-shadow: 0 7px 0 #999;
+  cursor: not-allowed;
+}
+
+.map-letter.completed {
+  background: #7be7a8;
+  color: #286b4b;
+  box-shadow: 0 7px 0 #4fbf7d;
+}
+
+.map-letter.completed::after {
+  content: "⭐";
+  position: absolute;
+  font-size: 20px;
+  right: -8px;
+  top: -7px;
+}
+
+/* ---------------- GAME ---------------- */
+
+.letter-big {
+  font-size: clamp(100px, 20vw, 180px);
+  line-height: 1;
+  color: #7052c9;
+  text-shadow: 5px 7px 0 #ffd65c;
+}
+
+.letter-small {
+  font-size: clamp(55px, 10vw, 90px);
+  color: #ff72ae;
+}
+
+.listen-btn {
+  background: #72d7ff;
+  color: #154c68;
+  padding: 14px 25px;
+  border-radius: 28px;
+  font-size: 19px;
+  font-weight: bold;
+  margin: 15px;
+  box-shadow: 0 6px 0 #46a7cb;
+}
+
+.instruction {
+  font-size: 25px;
+  font-weight: bold;
+  margin: 15px;
+}
+
+.character-message {
+  min-height: 50px;
+  font-size: 21px;
+  color: #7457b7;
+  font-weight: bold;
+}
+
+/* ---------------- ANSWERS ---------------- */
+
+.answers {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 20px;
+  margin: 25px auto;
+  max-width: 700px;
+}
+
+.answer {
+  background: #fff;
+  border: 5px solid #ded8ff;
+  border-radius: 25px;
+  padding: 22px 10px;
+  min-height: 150px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #4f4676;
+  transition: .2s;
+  box-shadow: 0 8px 15px rgba(70,50,130,.12);
+}
+
+.answer:hover {
+  transform: translateY(-5px);
+  border-color: #a38cf0;
+}
+
+.answer .emoji {
+  display: block;
+  font-size: 65px;
+  margin-bottom: 8px;
+}
+
+.correct {
+  border-color: #54d98b !important;
+  background: #dfffea !important;
+  animation: pop .5s;
+}
+
+.wrong {
+  border-color: #ff8585 !important;
+  background: #ffe4e4 !important;
+  animation: shake .4s;
+}
+
+@keyframes pop {
+  50% { transform: scale(1.12); }
+}
+
+@keyframes shake {
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-10px); }
+}
+
+/* ---------------- PROGRESS ---------------- */
+
+.progress-wrap {
+  margin: 20px auto;
+  max-width: 700px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 7px;
+}
+
+.progress {
+  height: 18px;
+  background: #e5e1f4;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#75ddff,#ff70b0);
+  transition: .5s;
+}
+
+/* ---------------- LEVELS ---------------- */
+
+.level-buttons {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 15px;
+  max-width: 650px;
+  margin: 25px auto;
+}
+
+.level-btn {
+  background: #f1edff;
+  border: 4px solid #ddd5ff;
+  padding: 22px;
+  border-radius: 25px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #5c4d98;
+}
+
+.level-btn:hover {
+  background: #e3dcff;
+  transform: scale(1.02);
+}
+
+/* ---------------- CANVAS ---------------- */
+
+.canvas-area {
+  background: #fff;
+  border: 6px dashed #a48de8;
+  border-radius: 25px;
+  width: min(100%, 500px);
+  height: 300px;
+  margin: 20px auto;
+  position: relative;
+  overflow: hidden;
+}
+
+#drawingCanvas {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  position: relative;
+  z-index: 2;
+}
+
+.guide-letter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 230px;
+  font-weight: bold;
+  color: rgba(150,130,220,.14);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ---------------- RESULT ---------------- */
+
+.result-title {
+  font-size: 55px;
+  color: #7555c7;
+}
+
+.big-stars {
+  font-size: 65px;
+  margin: 20px;
+  animation: float 2s infinite;
+}
+
+.score-result {
+  font-size: 28px;
+  margin: 15px;
+}
+
+/* ---------------- CONFETTI ---------------- */
+
+.confetti {
+  position: fixed;
+  top: -20px;
+  width: 12px;
+  height: 18px;
+  z-index: 9999;
+  animation: fall 2.5s linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(720deg);
+  }
+}
+
+/* ---------------- TOAST ---------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 15px 25px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  z-index: 999;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+
+@media(max-width:700px) {
+  .topbar {
+    padding: 10px;
+    flex-direction: column;
+  }
+
+  .card {
+    padding: 22px 14px;
+  }
+
+  .map {
+    grid-template-columns: repeat(4,1fr);
+    gap: 12px;
+  }
+
+  .map-letter {
+    width: 60px;
+    height: 60px;
+    font-size: 23px;
+  }
+
+  .answers {
+    grid-template-columns: 1fr;
+    max-width: 350px;
+  }
+
+  .answer {
+    min-height: 110px;
+    padding: 12px;
+  }
+
+  .answer .emoji {
+    font-size: 45px;
+  }
+
+  .level-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="logo">🪄 Magic Letters Adventure</div>
+
+  <div class="stats">
+    <div class="stat">⭐ <span id="score">0</span></div>
+    <div class="stat">🌟 <span id="stars">0</span></div>
+  </div>
+</header>
+
+<!-- ================= START SCREEN ================= -->
+
+<section id="startScreen" class="screen">
+  <div class="card">
+
+    <div class="magic-stars">✨ ⭐ ✨</div>
+
+    <div class="lumi">🧙‍♀️</div>
+
+    <h1 class="magic-title">
+      MAGIC LETTERS<br>ADVENTURE
+    </h1>
+
+    <p class="subtitle">
+      Learn • Listen • Play • Win
+    </p>
+
+    <button class="main-btn" onclick="startAdventure()">
+      🎮 START ADVENTURE
+    </button>
+
+    <br>
+
+    <button class="secondary-btn" onclick="showProgress()">
+      🏆 My Progress
+    </button>
+
+    <button class="secondary-btn" onclick="toggleLanguage()">
+      🌐 العربية / English
+    </button>
+
+  </div>
+</section>
+
+<!-- ================= MAP ================= -->
+
+<section id="mapScreen" class="screen hidden">
+  <div class="card">
+
+    <h2 class="map-title">🗺️ Magic World</h2>
+
+    <p class="instruction">
+      Choose your next magical letter!
+    </p>
+
+    <div class="map" id="letterMap"></div>
+
+    <button class="secondary-btn" onclick="goHome()">
+      🏠 Home
+    </button>
+
+  </div>
+</section>
+
+<!-- ================= LEVEL SCREEN ================= -->
+
+<section id="levelScreen" class="screen hidden">
+  <div class="card">
+
+    <div class="lumi">🧙‍♀️</div>
+
+    <h2 id="selectedLetterTitle" class="map-title"></h2>
+
+    <p class="instruction">
+      Choose a level
+    </p>
+
+    <div class="level-buttons">
+
+      <button class="level-btn" onclick="startLevel(1)">
+        🔤<br>
+        Level 1<br>
+        <small>Meet the Letter</small>
+      </button>
+
+      <button class="level-btn" onclick="startLevel(2)">
+        👂<br>
+        Level 2<br>
+        <small>Listen & Choose</small>
+      </button>
+
+      <button class="level-btn" onclick="startLevel(3)">
+        🧩<br>
+        Level 3<br>
+        <small>Find the Word</small>
+      </button>
+
+      <button class="level-btn" onclick="startLevel(4)">
+        ✏️<br>
+        Level 4<br>
+        <small>Write the Letter</small>
+      </button>
+
+    </div>
+
+    <button class="secondary-btn" onclick="showMap()">
+      🗺️ Back to Map
+    </button>
+
+  </div>
+</section>
+
+<!-- ================= GAME ================= -->
+
+<section id="gameScreen" class="screen hidden">
+  <div class="card">
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="levelName">Level 1</span>
+        <span id="questionCounter">1 / 5</span>
+      </div>
+
+      <div class="progress">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+    </div>
+
+    <div id="gameCharacter" class="lumi">🧙‍♀️</div>
+
+    <div id="characterMessage" class="character-message">
+      Let's learn!
+    </div>
+
+    <div id="gameContent"></div>
+
+    <div>
+      <button class="secondary-btn" onclick="speakCurrent()">
+        🔊 Listen
+      </button>
+
+      <button class="secondary-btn" onclick="showMap()">
+        🗺️ Map
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= RESULT ================= -->
+
+<section id="resultScreen" class="screen hidden">
+  <div class="card">
+
+    <div class="lumi">🧙‍♀️</div>
+
+    <h1 class="result-title">🎉 AMAZING!</h1>
+
+    <div id="resultStars" class="big-stars">
+      ⭐⭐⭐
+    </div>
+
+    <div id="resultText" class="score-result"></div>
+
+    <button class="main-btn" onclick="nextLetter()">
+      ➡️ Next Letter
+    </button>
+
+    <button class="secondary-btn" onclick="showMap()">
+      🗺️ World Map
+    </button>
+
+    <button class="secondary-btn" onclick="replayLetter()">
+      🔄 Play Again
+    </button>
+
+  </div>
+</section>
+
+<!-- ================= PROGRESS ================= -->
+
+<section id="progressScreen" class="screen hidden">
+  <div class="card">
+
+    <h1 class="map-title">🏆 My Progress</h1>
+
+    <div class="score-result">
+      Letters Completed:
+      <strong id="completedCount">0/26</strong>
+    </div>
+
+    <div class="score-result">
+      ⭐ Total Stars:
+      <strong id="totalStars">0</strong>
+    </div>
+
+    <div class="score-result">
+      🎯 Best Score:
+      <strong id="bestScore">0</strong>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress">
+        <div id="overallProgress" class="progress-bar"></div>
+      </div>
+    </div>
+
+    <br>
+
+    <button class="secondary-btn" onclick="goHome()">
+      🏠 Home
+    </button>
+
+    <button class="secondary-btn" onclick="resetProgress()">
+      ♻️ Reset Progress
+    </button>
+
+  </div>
+</section>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+
+/* =========================================================
+   MAGIC LETTERS ADVENTURE
+   ========================================================= */
+
+const letters = [
+  {letter:"A", word:"Apple", emoji:"🍎", extras:[
+    ["Ant","🐜"],["Airplane","✈️"]
+  ]},
+  {letter:"B", word:"Bear", emoji:"🐻", extras:[
+    ["Ball","⚽"],["Banana","🍌"]
+  ]},
+  {letter:"C", word:"Cat", emoji:"🐱", extras:[
+    ["Car","🚗"],["Cake","🎂"]
+  ]},
+  {letter:"D", word:"Dog", emoji:"🐶", extras:[
+    ["Duck","🦆"],["Dinosaur","🦖"]
+  ]},
+  {letter:"E", word:"Elephant", emoji:"🐘", extras:[
+    ["Egg","🥚"],["Eagle","🦅"]
+  ]},
+  {letter:"F", word:"Fish", emoji:"🐟", extras:[
+    ["Fox","🦊"],["Flower","🌸"]
+  ]},
+  {letter:"G", word:"Giraffe", emoji:"🦒", extras:[
+    ["Grapes","🍇"],["Goat","🐐"]
+  ]},
+  {letter:"H", word:"Horse", emoji:"🐴", extras:[
+    ["Hat","🎩"],["House","🏠"]
+  ]},
+  {letter:"I", word:"Ice Cream", emoji:"🍦", extras:[
+    ["Igloo","🏠"],["Insect","🐞"]
+  ]},
+  {letter:"J", word:"Juice", emoji:"🧃", extras:[
+    ["Jellyfish","🪼"],["Jacket","🧥"]
+  ]},
+  {letter:"K", word:"Kite", emoji:"🪁", extras:[
+    ["Key","🔑"],["Kangaroo","🦘"]
+  ]},
+  {letter:"L", word:"Lion", emoji:"🦁", extras:[
+    ["Leaf","🍃"],["Lemon","🍋"]
+  ]},
+  {letter:"M", word:"Monkey", emoji:"🐒", extras:[
+    ["Moon","🌙"],["Milk","🥛"]
+  ]},
+  {letter:"N", word:"Nest", emoji:"🪺", extras:[
+    ["Nose","👃"],["Nurse","🧑‍⚕️"]
+  ]},
+  {letter:"O", word:"Orange", emoji:"🍊", extras:[
+    ["Owl","🦉"],["Octopus","🐙"]
+  ]},
+  {letter:"P", word:"Penguin", emoji:"🐧", extras:[
+    ["Pizza","🍕"],["Pencil","✏️"]
+  ]},
+  {letter:"Q", word:"Queen", emoji:"👸", extras:[
+    ["Quilt","🛏️"],["Quail","🐦"]
+  ]},
+  {letter:"R", word:"Rabbit", emoji:"🐰", extras:[
+    ["Rainbow","🌈"],["Robot","🤖"]
+  ]},
+  {letter:"S", word:"Sun", emoji:"☀️", extras:[
+    ["Star","⭐"],["Snake","🐍"]
+  ]},
+  {letter:"T", word:"Tiger", emoji:"🐯", extras:[
+    ["Tree","🌳"],["Train","🚂"]
+  ]},
+  {letter:"U", word:"Umbrella", emoji:"☂️", extras:[
+    ["Unicorn","🦄"],["Uniform","👕"]
+  ]},
+  {letter:"V", word:"Van", emoji:"🚐", extras:[
+    ["Violin","🎻"],["Volcano","🌋"]
+  ]},
+  {letter:"W", word:"Whale", emoji:"🐋", extras:[
+    ["Watermelon","🍉"],["Watch","⌚"]
+  ]},
+  {letter:"X", word:"Xylophone", emoji:"🎼", extras:[
+    ["X-ray","🩻"],["Xylophone","🎵"]
+  ]},
+  {letter:"Y", word:"Yo-yo", emoji:"🪀", extras:[
+    ["Yacht","🛥️"],["Yellow","💛"]
+  ]},
+  {letter:"Z", word:"Zebra", emoji:"🦓", extras:[
+    ["Zoo","🦒"],["Zip","🤐"]
+  ]}
+];
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+let state = {
+  currentLetter: 0,
+  currentLevel: 1,
+  question: 0,
+  score: 0,
+  stars: 0,
+  completed: [],
+  bestScore: 0
+};
+
+const saved = localStorage.getItem("magicLettersProgress");
+
+if(saved){
+  try {
+    state = {...state, ...JSON.parse(saved)};
+  } catch(e){}
+}
+
+let currentOptions = [];
+let drawing = false;
+let canvas;
+
+/* =========================================================
+   STORAGE
+   ========================================================= */
+
+function saveProgress(){
+  localStorage.setItem(
+    "magicLettersProgress",
+    JSON.stringify(state)
+  );
+  updateStats();
+}
+
+function updateStats(){
+  document.getElementById("score").textContent = state.score;
+  document.getElementById("stars").textContent = state.stars;
+}
+
+/* =========================================================
+   SCREEN SYSTEM
+   ========================================================= */
+
+function hideScreens(){
+  document.querySelectorAll(".screen")
+    .forEach(s => s.classList.add("hidden"));
+}
+
+function showScreen(id){
+  hideScreens();
+  document.getElementById(id).classList.remove("hidden");
+  updateStats();
+}
+
+function goHome(){
+  showScreen("startScreen");
+}
+
+function startAdventure(){
+  showMap();
+}
+
+function showMap(){
+  buildMap();
+  showScreen("mapScreen");
+}
+
+function showProgress(){
+  updateProgressScreen();
+  showScreen("progressScreen");
+}
+
+/* =========================================================
+   MAP
+   ========================================================= */
+
+function buildMap(){
+
+  const map = document.getElementById("letterMap");
+  map.innerHTML = "";
+
+  letters.forEach((item,index)=>{
+
+    const btn = document.createElement("button");
+
+    btn.className = "map-letter";
+
+    const unlocked =
+      index === 0 ||
+      state.completed.includes(index-1);
+
+    if(!unlocked){
+      btn.classList.add("locked");
+      btn.innerHTML = "🔒";
+    }
+    else if(state.completed.includes(index)){
+      btn.classList.add("completed");
+      btn.innerHTML = item.letter;
+    }
+    else {
+      btn.innerHTML = item.letter;
+    }
+
+    if(unlocked){
+      btn.onclick = () => selectLetter(index);
+    }
+
+    map.appendChild(btn);
+  });
+}
+
+function selectLetter(index){
+
+  const unlocked =
+    index === 0 ||
+    state.completed.includes(index-1);
+
+  if(!unlocked){
+    showToast("🔒 Complete the previous letter first!");
+    return;
+  }
+
+  state.currentLetter = index;
+
+  document.getElementById("selectedLetterTitle")
+    .textContent =
+    `🔤 Letter ${letters[index].letter}`;
+
+  showScreen("levelScreen");
+}
+
+/* =========================================================
+   LEVELS
+   ========================================================= */
+
+function startLevel(level){
+
+  state.currentLevel = level;
+  state.question = 0;
+
+  currentOptions = [];
+
+  showScreen("gameScreen");
+
+  loadQuestion();
+}
+
+/* =========================================================
+   QUESTION SYSTEM
+   ========================================================= */
+
+function loadQuestion(){
+
+  const item = letters[state.currentLetter];
+
+  document.getElementById("levelName").textContent =
+    `Level ${state.currentLevel}`;
+
+  document.getElementById("questionCounter").textContent =
+    `${Math.min(state.question+1,5)} / 5`;
+
+  document.getElementById("progressBar").style.width =
+    `${(state.question / 5) * 100}%`;
+
+  document.getElementById("characterMessage").textContent =
+    getMessage();
+
+  if(state.currentLevel === 1){
+    renderLevel1(item);
+  }
+
+  else if(state.currentLevel === 2){
+    renderLevel2(item);
+  }
+
+  else if(state.currentLevel === 3){
+    renderLevel3(item);
+  }
+
+  else {
+    renderLevel4(item);
+  }
+}
+
+/* =========================================================
+   LEVEL 1
+   ========================================================= */
+
+function renderLevel1(item){
+
+  const content = document.getElementById("gameContent");
+
+  content.innerHTML = `
+
+    <div class="letter-big">${item.letter}</div>
+    <div class="letter-small">${item.letter.toLowerCase()}</div>
+
+    <div class="instruction">
+      Find the word that starts with ${item.letter}
+    </div>
+
+    <div class="answers" id="answers"></div>
+  `;
+
+  speakLetter(item.letter);
+
+  const correct = {
+    word:item.word,
+    emoji:item.emoji
+  };
+
+  const wrongPool = [];
+
+  letters.forEach(l=>{
+    if(l.letter !== item.letter){
+      wrongPool.push({
+        word:l.word,
+        emoji:l.emoji
+      });
+    }
+  });
+
+  shuffle(wrongPool);
+
+  currentOptions = [
+    correct,
+    wrongPool[0],
+    wrongPool[1]
+  ];
+
+  shuffle(currentOptions);
+
+  renderAnswers(currentOptions, correct.word);
+}
+
+/* =========================================================
+   LEVEL 2
+   ========================================================= */
+
+function renderLevel2(item){
+
+  const content = document.getElementById("gameContent");
+
+  content.innerHTML = `
+
+    <div class="instruction">
+      👂 Listen carefully!
+    </div>
+
+    <div style="font-size:60px">🔊</div>
+
+    <div class="instruction">
+      Which letter did you hear?
+    </div>
+
+    <div class="answers" id="answers"></div>
+  `;
+
+  setTimeout(()=>{
+    speakLetter(item.letter);
+  },300);
+
+  let options = [item.letter];
+
+  const alphabet =
+    letters.map(x=>x.letter)
+      .filter(x=>x !== item.letter);
+
+  shuffle(alphabet);
+
+  options.push(alphabet[0],alphabet[1]);
+
+  shuffle(options);
+
+  const answers =
+    options.map(letter=>({
+      word:letter,
+      emoji:"🔤"
+    }));
+
+  currentOptions = answers;
+
+  renderAnswers(answers,item.letter);
+}
+
+/* =========================================================
+   LEVEL 3
+   ========================================================= */
+
+function renderLevel3(item){
+
+  const content = document.getElementById("gameContent");
+
+  content.innerHTML = `
+
+    <div class="instruction">
+      🔊 Listen to the sound!
+    </div>
+
+    <div style="font-size:70px">👂</div>
+
+    <div class="instruction">
+      Which word starts with this sound?
+    </div>
+
+    <div class="answers" id="answers"></div>
+  `;
+
+  setTimeout(()=>{
+    speakLetter(item.letter);
+  },300);
+
+  const correct = {
+    word:item.word,
+    emoji:item.emoji
+  };
+
+  const wrong = [];
+
+  letters.forEach(l=>{
+    if(l.letter !== item.letter){
+      wrong.push({
+        word:l.word,
+        emoji:l.emoji
+      });
+    }
+  });
+
+  shuffle(wrong);
+
+  const options=[
+    correct,
+    wrong[0],
+    wrong[1]
+  ];
+
+  shuffle(options);
+
+  currentOptions=options;
+
+  renderAnswers(options,correct.word);
+}
+
+/* =========================================================
+   ANSWERS
+   ========================================================= */
+
+function renderAnswers(options,correct){
+
+  const box =
+    document.getElementById("answers");
+
+  box.innerHTML="";
+
+  options.forEach(option=>{
+
+    const btn=document.createElement("button");
+
+    btn.className="answer";
+
+    btn.innerHTML=`
+      <span class="emoji">${option.emoji}</span>
+      ${option.word}
+    `;
+
+    btn.onclick=()=>{
+      checkAnswer(btn,option.word,correct);
+    };
+
+    box.appendChild(btn);
+  });
+}
+
+function checkAnswer(button,value,correct){
+
+  if(value === correct){
+
+    button.classList.add("correct");
+
+    state.score++;
+
+    if(state.score % 5 === 0){
+      state.stars++;
+      showToast("🌟 Bonus Star!");
+    }
+
+    document.getElementById("characterMessage").textContent =
+      getCorrectMessage();
+
+    createConfetti();
+
+    saveProgress();
+
+    setTimeout(nextQuestion,900);
+
+  } else {
+
+    button.classList.add("wrong");
+
+    document.getElementById("characterMessage").textContent =
+      "💪 Try again! You can do it!";
+
+    speakCurrent();
+  }
+}
+
+/* =========================================================
+   NEXT QUESTION
+   ========================================================= */
+
+function nextQuestion(){
+
+  state.question++;
+
+  if(state.question >= 5){
+
+    finishLevel();
+
+  } else {
+
+    loadQuestion();
+  }
+}
+
+/* =========================================================
+   LEVEL 4 - DRAWING
+   ========================================================= */
+
+function renderLevel4(item){
+
+  const content =
+    document.getElementById("gameContent");
+
+  content.innerHTML=`
+
+    <div class="letter-big"
+         style="font-size:90px">
+      ${item.letter}
+    </div>
+
+    <div class="instruction">
+      ✏️ Write the letter ${item.letter}
+    </div>
+
+    <div class="canvas-area">
+      <div class="guide-letter">
+        ${item.letter}
+      </div>
+      <canvas id="drawingCanvas"></canvas>
+    </div>
+
+    <button class="secondary-btn"
+            onclick="clearCanvas()">
+      🧹 Clear
+    </button>
+
+    <button class="main-btn"
+            onclick="checkDrawing()">
+      ✅ Check
+    </button>
+  `;
+
+  initCanvas();
+}
+
+/* =========================================================
+   CANVAS
+   ========================================================= */
+
+function initCanvas(){
+
+  canvas=document.getElementById("drawingCanvas");
+
+  const rect=canvas.getBoundingClientRect();
+
+  canvas.width=rect.width;
+  canvas.height=rect.height;
+
+  const ctx=canvas.getContext("2d");
+
+  ctx.lineWidth=12;
+  ctx.lineCap="round";
+  ctx.lineJoin="round";
+  ctx.strokeStyle="#7052c9";
+
+  function getPosition(e){
+
+    const r=canvas.getBoundingClientRect();
+
+    if(e.touches){
+      return {
+        x:e.touches[0].clientX-r.left,
+        y:e.touches[0].clientY-r.top
+      };
+    }
+
+    return {
+      x:e.clientX-r.left,
+      y:e.clientY-r.top
+    };
+  }
+
+  function start(e){
+
+    e.preventDefault();
+
+    drawing=true;
+
+    const p=getPosition(e);
+
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y);
+  }
+
+  function draw(e){
+
+    if(!drawing)return;
+
+    e.preventDefault();
+
+    const p=getPosition(e);
+
+    ctx.lineTo(p.x,p.y);
+    ctx.stroke();
+  }
+
+  function stop(){
+    drawing=false;
+  }
+
+  canvas.addEventListener("mousedown",start);
+  canvas.addEventListener("mousemove",draw);
+  canvas.addEventListener("mouseup",stop);
+  canvas.addEventListener("mouseleave",stop);
+
+  canvas.addEventListener("touchstart",start,{passive:false});
+  canvas.addEventListener("touchmove",draw,{passive:false});
+  canvas.addEventListener("touchend",stop);
+}
+
+function clearCanvas(){
+
+  if(!canvas)return;
+
+  const ctx=canvas.getContext("2d");
+
+  ctx.clearRect(
+    0,0,
+    canvas.width,
+    canvas.height
+  );
+}
+
+function checkDrawing(){
+
+  if(!canvas)return;
+
+  const ctx=canvas.getContext("2d");
+
+  const pixels =
+    ctx.getImageData(
+      0,0,
+      canvas.width,
+      canvas.height
+    ).data;
+
+  let count=0;
+
+  for(let i=3;i<pixels.length;i+=4){
+
+    if(pixels[i]>0){
+      count++;
+    }
+  }
+
+  if(count>150){
+
+    state.score++;
+    state.stars++;
+
+    createConfetti();
+
+    showToast("🎉 Great writing!");
+
+    saveProgress();
+
+    setTimeout(nextQuestion,1000);
+
+  }else{
+
+    showToast("✏️ Draw the letter a little more!");
+  }
+}
+
+/* =========================================================
+   FINISH LEVEL
+   ========================================================= */
+
+function finishLevel(){
+
+  state.score =
+    Math.max(state.score,0);
+
+  if(state.currentLevel === 4){
+
+    if(!state.completed.includes(state.currentLetter)){
+      state.completed.push(state.currentLetter);
+      state.stars++;
+    }
+
+    state.bestScore =
+      Math.max(state.bestScore,state.score);
+
+    saveProgress();
+
+    showResult();
+
+  } else {
+
+    state.currentLevel++;
+
+    state.question=0;
+
+    startLevel(state.currentLevel);
+  }
+}
+
+/* =========================================================
+   RESULT
+   ========================================================= */
+
+function showResult(){
+
+  const item=letters[state.currentLetter];
+
+  document.getElementById("resultText").innerHTML=
+    `
+      <strong>Letter ${item.letter}</strong><br><br>
+      ⭐ Score: ${state.score}<br>
+      🌟 Stars: ${state.stars}
+    `;
+
+  const completed =
+    state.completed.length;
+
+  if(completed===26){
+
+    document.querySelector(".result-title")
+      .textContent="👑 YOU DID IT!";
+
+    document.getElementById("resultText").innerHTML=
+      `
+      <strong>You mastered all 26 letters!</strong>
+      <br><br>
+      🏆 Master of Letters
+      <br><br>
+      ⭐ ${state.stars} Stars
+      `;
+
+  }else{
+
+    document.querySelector(".result-title")
+      .textContent="🎉 AMAZING!";
+  }
+
+  showScreen("resultScreen");
+}
+
+function nextLetter(){
+
+  if(state.currentLetter < 25){
+
+    state.currentLetter++;
+
+    if(!state.completed.includes(state.currentLetter-1)){
+      state.completed.push(state.currentLetter-1);
+    }
+
+    saveProgress();
+
+    document.getElementById("selectedLetterTitle")
+      .textContent =
+      `🔤 Letter ${letters[state.currentLetter].letter}`;
+
+    showScreen("levelScreen");
+
+  }else{
+
+    showResult();
+  }
+}
+
+function replayLetter(){
+
+  state.question=0;
+
+  startLevel(1);
+}
+
+/* =========================================================
+   SPEECH
+   ========================================================= */
+
+function speak(text){
+
+  if(!("speechSynthesis" in window)){
+
+    showToast("🔊 Speech is not supported.");
+
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  const utterance =
+    new SpeechSynthesisUtterance(text);
+
+  utterance.lang="en-US";
+  utterance.rate=.75;
+  utterance.pitch=1.15;
+
+  speechSynthesis.speak(utterance);
+}
+
+function speakLetter(letter){
+
+  speak(`Letter ${letter}. ${letter}`);
+}
+
+function speakWord(word){
+
+  speak(word);
+}
+
+function speakCurrent(){
+
+  const item=letters[state.currentLetter];
+
+  if(state.currentLevel===1 ||
+     state.currentLevel===2 ||
+     state.currentLevel===3){
+
+    speakLetter(item.letter);
+
+  }else{
+
+    speak(`Write the letter ${item.letter}`);
+  }
+}
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+
+function getMessage(){
+
+  const messages=[
+    "✨ Let's learn!",
+    "🪄 Magic time!",
+    "🌟 You can do it!",
+    "🚀 Let's go!",
+    "🎯 Find the answer!"
+  ];
+
+  return messages[
+    Math.floor(Math.random()*messages.length)
+  ];
+}
+
+function getCorrectMessage(){
+
+  const messages=[
+    "🎉 Great job!",
+    "⭐ Amazing!",
+    "🌟 Excellent!",
+    "👏 Fantastic!",
+    "🚀 Super!",
+    "🪄 Magical!"
+  ];
+
+  return messages[
+    Math.floor(Math.random()*messages.length)
+  ];
+}
+
+/* =========================================================
+   CONFETTI
+   ========================================================= */
+
+function createConfetti(){
+
+  for(let i=0;i<35;i++){
+
+    const el=document.createElement("div");
+
+    el.className="confetti";
+
+    el.style.left =
+      Math.random()*100+"vw";
+
+    el.style.animationDelay =
+      Math.random()*.5+"s";
+
+    el.style.transform =
+      `rotate(${Math.random()*360}deg)`;
+
+    const colors=[
+      "#ff69ad",
+      "#ffd84d",
+      "#69d9ff",
+      "#7be7a8",
+      "#9a7cff"
+    ];
+
+    el.style.background =
+      colors[Math.floor(Math.random()*colors.length)];
+
+    document.body.appendChild(el);
+
+    setTimeout(()=>{
+      el.remove();
+    },3000);
+  }
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+function showToast(message){
+
+  const toast=
+    document.getElementById("toast");
+
+  toast.textContent=message;
+
+  toast.classList.remove("hidden");
+
+  setTimeout(()=>{
+    toast.classList.add("hidden");
+  },1800);
+}
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+function updateProgressScreen(){
+
+  document.getElementById("completedCount")
+    .textContent =
+    `${state.completed.length}/26`;
+
+  document.getElementById("totalStars")
+    .textContent=state.stars;
+
+  document.getElementById("bestScore")
+    .textContent=state.bestScore;
+
+  document.getElementById("overallProgress")
+    .style.width =
+    `${(state.completed.length/26)*100}%`;
+}
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+function resetProgress(){
+
+  const confirmReset =
+    confirm(
+      "Are you sure you want to reset all progress?"
+    );
+
+  if(!confirmReset)return;
+
+  state={
+    currentLetter:0,
+    currentLevel:1,
+    question:0,
+    score:0,
+    stars:0,
+    completed:[],
+    bestScore:0
+  };
+
+  saveProgress();
+
+  showToast("♻️ Progress reset!");
+
+  setTimeout(goHome,800);
+}
+
+/* =========================================================
+   LANGUAGE
+   ========================================================= */
+
+let arabic=false;
+
+function toggleLanguage(){
+
+  arabic=!arabic;
+
+  if(arabic){
+
+    document.querySelector(".logo")
+      .textContent="🪄 رحلة الحروف السحرية";
+
+    document.querySelector(".magic-title")
+      .innerHTML="رحلة الحروف<br>السحرية";
+
+    document.querySelector(".subtitle")
+      .textContent="تعلّم • استمع • العب • اربح";
+
+  }else{
+
+    location.reload();
+  }
+}
+
+/* =========================================================
+   UTILS
+   ========================================================= */
+
+function shuffle(array){
+
+  for(let i=array.length-1;i>0;i--){
+
+    const j=Math.floor(
+      Math.random()*(i+1)
+    );
+
+    [array[i],array[j]]=
+    [array[j],array[i]];
+  }
+
+  return array;
+}
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+updateStats();
+
+</script>
+
+</body>
+</html>
