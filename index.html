@@ -822,6 +822,8 @@ if(saved){
 
 let currentOptions = [];
 let drawing = false;
+let questionLocked = false;
+let drawingLocked = false;
 let canvas;
 
 /* =========================================================
@@ -829,6 +831,12 @@ let canvas;
    ========================================================= */
 
 function saveProgress(){
+  state.completed = [...new Set(state.completed)]
+    .filter(index => Number.isInteger(index) && index >= 0 && index < letters.length)
+    .sort((a,b) => a-b);
+  state.score = Math.max(0, Number(state.score) || 0);
+  state.stars = Math.max(0, Number(state.stars) || 0);
+  state.bestScore = Math.max(0, Number(state.bestScore) || 0);
   localStorage.setItem(
     "magicLettersProgress",
     JSON.stringify(state)
@@ -939,8 +947,10 @@ function selectLetter(index){
 
 function startLevel(level){
 
-  state.currentLevel = level;
+  state.currentLevel = Math.min(4, Math.max(1, Number(level) || 1));
   state.question = 0;
+  questionLocked = false;
+  drawingLocked = false;
 
   currentOptions = [];
 
@@ -955,6 +965,8 @@ function startLevel(level){
 
 function loadQuestion(){
 
+  questionLocked = false;
+  drawingLocked = false;
   const item = letters[state.currentLetter];
 
   document.getElementById("levelName").textContent =
@@ -1177,7 +1189,13 @@ function renderAnswers(options,correct){
 
 function checkAnswer(button,value,correct){
 
+  if(questionLocked)return;
+
   if(value === correct){
+    questionLocked = true;
+    document.querySelectorAll("#answers .answer").forEach(answer => {
+      answer.disabled = true;
+    });
 
     button.classList.add("correct");
 
@@ -1200,6 +1218,7 @@ function checkAnswer(button,value,correct){
   } else {
 
     button.classList.add("wrong");
+    button.disabled = true;
 
     document.getElementById("characterMessage").textContent =
       "💪 Try again! You can do it!";
@@ -1274,6 +1293,8 @@ function renderLevel4(item){
 function initCanvas(){
 
   canvas=document.getElementById("drawingCanvas");
+  drawing = false;
+  drawingLocked = false;
 
   const rect=canvas.getBoundingClientRect();
 
@@ -1332,14 +1353,12 @@ function initCanvas(){
     drawing=false;
   }
 
-  canvas.addEventListener("mousedown",start);
-  canvas.addEventListener("mousemove",draw);
-  canvas.addEventListener("mouseup",stop);
-  canvas.addEventListener("mouseleave",stop);
-
-  canvas.addEventListener("touchstart",start,{passive:false});
-  canvas.addEventListener("touchmove",draw,{passive:false});
-  canvas.addEventListener("touchend",stop);
+  canvas.addEventListener("pointerdown", start);
+  canvas.addEventListener("pointermove", draw);
+  canvas.addEventListener("pointerup", stop);
+  canvas.addEventListener("pointercancel", stop);
+  canvas.addEventListener("pointerleave", stop);
+  canvas.addEventListener("contextmenu", event => event.preventDefault());
 }
 
 function clearCanvas(){
@@ -1357,7 +1376,8 @@ function clearCanvas(){
 
 function checkDrawing(){
 
-  if(!canvas)return;
+  if(!canvas || drawingLocked)return;
+  drawingLocked = true;
 
   const ctx=canvas.getContext("2d");
 
@@ -1700,11 +1720,19 @@ function resetProgress(){
    LANGUAGE
    ========================================================= */
 
-let arabic=false;
+let arabic=localStorage.getItem("magicLettersLanguage") === "ar";
 
 function toggleLanguage(){
 
   arabic=!arabic;
+  localStorage.setItem("magicLettersLanguage", arabic ? "ar" : "en");
+  applyLanguage();
+}
+
+function applyLanguage(){
+
+  document.documentElement.dir = arabic ? "rtl" : "ltr";
+  document.documentElement.lang = arabic ? "ar" : "en";
 
   if(arabic){
 
@@ -1747,6 +1775,7 @@ function shuffle(array){
    ========================================================= */
 
 updateStats();
+applyLanguage();
 
 </script>
 
