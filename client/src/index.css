@@ -130,6 +130,11 @@ button { border: 0; }
 .track-card { position: relative; display: flex; flex-direction: column; min-height: 300px; padding: 24px; overflow: hidden; color: var(--ink); border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.62); transition: transform .25s cubic-bezier(.23,1,.32,1), box-shadow .25s ease, border-color .25s ease; }
 .track-card:hover { border-color: transparent; box-shadow: var(--shadow); transform: translateY(-7px); }
 .track-card--featured { color: var(--white); background: var(--navy); border-color: var(--navy); }
+.track-card__visual { position: relative; height: 148px; margin: -24px -24px 0; overflow: hidden; background: var(--navy-2); }
+.track-card__visual img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .45s cubic-bezier(.23,1,.32,1); }
+.track-card__visual-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,34,58,.04), rgba(13,34,58,.42)); }
+.track-card:hover .track-card__visual img { transform: scale(1.06); }
+.track-card--featured .track-card__visual { height: 168px; }
 .track-card__top { display: flex; align-items: flex-start; justify-content: space-between; }
 .track-card__number { color: var(--muted); font-family: Arial, sans-serif; font-size: 11px; font-weight: 800; }
 .track-card--featured .track-card__number { color: rgba(255,255,255,.5); }
